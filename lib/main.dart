@@ -13,21 +13,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -39,87 +24,78 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
+  late Animation<double> animation;
+  late AnimationController animationcontroller;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+//In Flutter, the initState method is a lifecycle method that is called when a stateful widget is inserted into the widget tree for the first time. It's part of the State class and is used to perform one-time initialization tasks for the widget's state.
+
+  void initState() {
+    super.initState();
+// we create a animate controller in initstate method. it manages animation lifecycle. vsync synchonize with h widget lifcycle
+    animationcontroller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+// tween defines the range of values
+    animation = Tween<double>(
+      begin: 100.0, // Initial size
+      end: 200.0, // Final size
+    ).animate(animationcontroller);
+// the below begins our animation from initial state to final state.
+    animationcontroller.forward();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        appBar: AppBar(
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text(widget.title),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        body: Center(
+          child: AnimatedBuilder(
+            animation: animation,
+            builder: (context, child) {
+              return Container(
+                width: animation.value, // Use the animated value for width
+                height: animation.value, // Use the animated value for height
+                color: Colors.blue,
+                child: const Center(
+                  child: Text(
+                    'Animated Container',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              );
+            },
+          ),
+        )
+        //akes auto-formatting nicer for build methods.
+        );
+  }
+
+  @override
+  void dispose() {
+    // Step 5: Dispose the AnimationController when the widget is disposed
+    animationcontroller.dispose();
+    super.dispose();
   }
 }
+//animation classes
+//  Animation- represents a value that changes over time
+//  Tween- defines a range of values for an animation
+//  AnimationController- controlls the duraton ,forward and reverse aspects of an animation
+// SingleTickerProviderStateMixin makes it easier for you to create smooth animation in your app
+//When you want to make something move or change smoothly over time (like a button getting bigger or smaller), you need a special tool called an AnimationController. This tool requires another special thing called a TickerProvider to work properly.
+//SingleTickerProviderStateMixin is like a quick and easy way to give your animation tool (the AnimationController) the special thing it needs (the TickerProvider). It's called "Single" because it's designed for cases where you have just one animation tool in your widget.
